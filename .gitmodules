@@ -1,0 +1,3 @@
+[submodule "sdl2-image"]
+	path = sdl2-image
+	url = https://github.com/sbidin/sdl2-image
