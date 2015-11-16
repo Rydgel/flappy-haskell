@@ -5,3 +5,7 @@ extra-deps:
 - sdl2-2.1.0
 - Yampa-0.10.3
 resolver: lts-3.13
+rebuild-ghc-options: true
+ghc-options:
+    "*": -O2
+    flappy-haskell: -Wall

@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Main where
+-- stack ghci --main-is flappy-haskell:exe:flappy-haskell --ghc-options="-lsdl2_image"
+
+module Main (main) where
 
 import           Control.Concurrent (threadDelay)
 import           Linear
@@ -49,7 +51,7 @@ main = do
   renderTexture r texture (P (V2 150 300))
   SDL.present r
 
-  threadDelay 200000000
+  threadDelay 20000000
 
   SDL.destroyRenderer r
   SDL.destroyWindow window
