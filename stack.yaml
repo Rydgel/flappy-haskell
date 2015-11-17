@@ -7,5 +7,4 @@ extra-deps:
 resolver: lts-3.13
 rebuild-ghc-options: true
 ghc-options:
-    "*": -O2
-    flappy-haskell: -Wall
+    flappy-haskell: "-threaded -O2 -Wall -lsdl2_image"

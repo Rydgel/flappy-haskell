@@ -1,7 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- stack ghci --main-is flappy-haskell:exe:flappy-haskell --ghc-options="-lsdl2_image"
-
 module Main (main) where
 
 import           Control.Concurrent (threadDelay)
