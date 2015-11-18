@@ -13,6 +13,9 @@ import qualified SDL.Image
 
 data Texture = Texture SDL.Texture (V2 CInt)
 
+getSDLTexture :: Texture -> SDL.Texture
+getSDLTexture (Texture t _) = t
+
 loadTexture :: SDL.Renderer -> FilePath -> IO Texture
 loadTexture r filePath = do
   surface <- SDL.Image.load filePath
@@ -47,10 +50,12 @@ main = do
   texture <- loadTexture r "assets/bird-01.png"
   SDL.clear r
   renderTexture r texture (P (V2 150 300))
+  renderTexture r texture (P (V2 0 0))
   SDL.present r
 
   threadDelay 20000000
 
+  SDL.destroyTexture $ getSDLTexture texture
   SDL.destroyRenderer r
   SDL.destroyWindow window
   SDL.quit
