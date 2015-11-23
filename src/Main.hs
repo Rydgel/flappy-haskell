@@ -1,15 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE Arrows #-}
 
 module Main (main) where
 
 import           Control.Concurrent (threadDelay)
-import           Linear
+import           Linear             hiding (identity)
 import           Linear.Affine
 import           Prelude            hiding (init)
 import           Foreign.C.Types
 import qualified SDL
 import           SDL (($=))
 import qualified SDL.Image
+import           FRP.Yampa
 
 data Texture = Texture SDL.Texture (V2 CInt)
 
@@ -30,8 +32,8 @@ renderTexture :: SDL.Renderer -> Texture -> Point V2 CInt -> IO ()
 renderTexture r (Texture t size) xy =
   SDL.copy r t Nothing (Just $ SDL.Rectangle xy size)
 
-main :: IO ()
-main = do
+main' :: IO ()
+main' = do
   SDL.initialize [SDL.InitVideo]
 
   window <- SDL.createWindow "Flappy Haskell" SDL.defaultWindow { SDL.windowInitialSize = V2 300 600 }
@@ -59,3 +61,22 @@ main = do
   SDL.destroyRenderer r
   SDL.destroyWindow window
   SDL.quit
+
+type Pos = Double
+type Vel = Double
+
+data Bird = Bird { birdPos :: Double
+                 , birdVel :: Double
+                 }
+
+fallingBird :: Bird -> SF () Bird
+fallingBird (Bird y0 v0) = proc _ -> do
+  v <- imIntegral v0 -< -9.81
+  y <- imIntegral y0 -< v
+  returnA -< Bird y v
+
+main :: IO ()
+main = reactimate (return ())
+                  (\_ -> threadDelay 100000 >> return (0.1, Nothing))
+                  (\_ (pos, vel) -> putStrLn ("pos: " ++ show pos ++ ", vel: " ++ show vel) >> return False)
+                  (fallingBird 10.0 0.0)
