@@ -5,15 +5,15 @@ module Graphics (animate) where
 import           Control.Applicative
 import           Control.Concurrent
 import           Control.Monad
-import           Linear             hiding (identity)
-import           Linear.Affine
-import           Prelude            hiding (init)
+import           Data.Text           (Text)
 import           Foreign.C.Types
-import qualified SDL
-import           SDL (($=))
-import qualified SDL.Image
-import           Data.Text (Text)
 import           FRP.Yampa
+import           Linear              hiding (identity)
+import           Linear.Affine
+import           Prelude             hiding (init)
+import           SDL                 (($=))
+import qualified SDL
+import qualified SDL.Image
 
 import           Types
 
