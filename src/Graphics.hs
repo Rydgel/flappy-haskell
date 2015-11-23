@@ -29,6 +29,41 @@ data Textures = Textures { bird1T    :: Texture
                          , skyT      :: Texture
                          }
 
+renderGame :: SDL.Renderer -> Textures -> Int -> Game -> IO ()
+renderGame r t winHeight g = do
+  print g
+  let (Bird pos _) = bird g
+  renderTexture r (bird1T t) (P (V2 (150 - 34 `div` 2) (round pos)))
+
+getSDLTexture :: Texture -> SDL.Texture
+getSDLTexture (Texture t _) = t
+
+loadTexture :: SDL.Renderer -> FilePath -> IO Texture
+loadTexture r filePath = do
+  surface <- SDL.Image.load filePath
+  size <- SDL.surfaceDimensions surface
+  let key = V4 0 maxBound maxBound maxBound
+  SDL.surfaceColorKey surface $= Just key
+  t <- SDL.createTextureFromSurface r surface
+  SDL.freeSurface surface
+  return (Texture t size)
+
+loadTextures :: SDL.Renderer -> IO Textures
+loadTextures r = Textures
+             <$> loadTexture r "assets/bird-01.png"
+             <*> loadTexture r "assets/bird-02.png"
+             <*> loadTexture r "assets/bird-03.png"
+             <*> loadTexture r "assets/bird-04.png"
+             <*> loadTexture r "assets/land.png"
+             <*> loadTexture r "assets/pipeDown.png"
+             <*> loadTexture r "assets/PipeUp.png"
+             <*> loadTexture r "assets/sky.png"
+
+renderTexture :: SDL.Renderer -> Texture -> Point V2 CInt -> IO ()
+renderTexture r (Texture t size) xy =
+  SDL.copy r t Nothing (Just $ SDL.Rectangle xy size)
+
+
 animate :: Text                  -- ^ window title
         -> Int                   -- ^ window width in pixels
         -> Int                   -- ^ window height in pixels
@@ -73,37 +108,3 @@ animate title winWidth winHeight sf = do
              { SDL.rendererType = SDL.AcceleratedVSyncRenderer
              , SDL.rendererTargetTexture = True
              }
-
-renderGame :: SDL.Renderer -> Textures -> Int -> Game -> IO ()
-renderGame r t winHeight g = do
-  print g
-  let (Bird pos _) = bird g
-  renderTexture r (bird1T t) (P (V2 (150 - 34 `div` 2) (round pos)))
-
-getSDLTexture :: Texture -> SDL.Texture
-getSDLTexture (Texture t _) = t
-
-loadTexture :: SDL.Renderer -> FilePath -> IO Texture
-loadTexture r filePath = do
-  surface <- SDL.Image.load filePath
-  size <- SDL.surfaceDimensions surface
-  let key = V4 0 maxBound maxBound maxBound
-  SDL.surfaceColorKey surface $= Just key
-  t <- SDL.createTextureFromSurface r surface
-  SDL.freeSurface surface
-  return (Texture t size)
-
-loadTextures :: SDL.Renderer -> IO Textures
-loadTextures r = Textures
-             <$> loadTexture r "assets/bird-01.png"
-             <*> loadTexture r "assets/bird-02.png"
-             <*> loadTexture r "assets/bird-03.png"
-             <*> loadTexture r "assets/bird-04.png"
-             <*> loadTexture r "assets/land.png"
-             <*> loadTexture r "assets/pipeDown.png"
-             <*> loadTexture r "assets/PipeUp.png"
-             <*> loadTexture r "assets/sky.png"
-
-renderTexture :: SDL.Renderer -> Texture -> Point V2 CInt -> IO ()
-renderTexture r (Texture t size) xy =
-  SDL.copy r t Nothing (Just $ SDL.Rectangle xy size)

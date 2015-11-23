@@ -1,14 +1,14 @@
+{-# LANGUAGE Arrows            #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE Arrows #-}
 
 module Main (main) where
 
-import           Prelude            hiding (init)
 import           FRP.Yampa
+import           Prelude   hiding (init)
 
-import           Types
-import           Input
 import           Graphics
+import           Input
+import           Types
 
 
 fallingBird :: Bird -> SF a Bird
