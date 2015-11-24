@@ -17,6 +17,7 @@ import qualified SDL.Image
 
 import           Types
 
+
 data Texture = Texture SDL.Texture (V2 CInt)
 
 data Textures = Textures { bird1T    :: Texture
@@ -29,11 +30,6 @@ data Textures = Textures { bird1T    :: Texture
                          , skyT      :: Texture
                          }
 
-renderGame :: SDL.Renderer -> Textures -> Int -> Game -> IO ()
-renderGame r t winHeight g = do
-  print g
-  let (Bird pos _) = bird g
-  renderTexture r (bird1T t) (P (V2 (150 - 34 `div` 2) (round pos)))
 
 getSDLTexture :: Texture -> SDL.Texture
 getSDLTexture (Texture t _) = t
@@ -63,6 +59,24 @@ renderTexture :: SDL.Renderer -> Texture -> Point V2 CInt -> IO ()
 renderTexture r (Texture t size) xy =
   SDL.copy r t Nothing (Just $ SDL.Rectangle xy size)
 
+renderGame :: SDL.Renderer -> Textures -> Int -> Game -> IO ()
+renderGame r t winHeight g = do
+  print g
+  let groundP = round $ groundPos $ ground g
+  let (Bird pos _) = bird g
+  renderTexture r (landT t) (P (V2 groundP (600 - 112)))
+  renderTexture r (bird1T t) (P (V2 (150 - 34 `div` 2) (round pos)))
+
+destroyTextures :: Textures -> IO ()
+destroyTextures ts = do
+  SDL.destroyTexture $ getSDLTexture $ bird1T ts
+  SDL.destroyTexture $ getSDLTexture $ bird2T ts
+  SDL.destroyTexture $ getSDLTexture $ bird3T ts
+  SDL.destroyTexture $ getSDLTexture $ bird4T ts
+  SDL.destroyTexture $ getSDLTexture $ landT ts
+  SDL.destroyTexture $ getSDLTexture $ pipeDownT ts
+  SDL.destroyTexture $ getSDLTexture $ pipeUpT ts
+  SDL.destroyTexture $ getSDLTexture $ skyT ts
 
 animate :: Text                  -- ^ window title
         -> Int                   -- ^ window width in pixels
@@ -73,11 +87,8 @@ animate title winWidth winHeight sf = do
     SDL.initialize [SDL.InitVideo]
     window <- SDL.createWindow title windowConf
     SDL.showWindow window
-
     renderer <- SDL.createRenderer window (-1) renderConf
-
     SDL.rendererDrawColor renderer $= V4 maxBound maxBound maxBound maxBound
-
     textures <- loadTextures renderer
 
     lastInteraction <- newMVar =<< SDL.time
@@ -97,13 +108,15 @@ animate title winWidth winHeight sf = do
 
     reactimate (return NoEvent) senseInput renderOutput sf
 
-    -- SDL.destroyTexture $ getSDLTexture texture -- FIXME
+    destroyTextures textures
     SDL.destroyRenderer renderer
     SDL.destroyWindow window
     SDL.quit
 
     where windowConf = SDL.defaultWindow
-             { SDL.windowInitialSize = V2 (fromIntegral winWidth) (fromIntegral winHeight) }
+             { SDL.windowInitialSize =
+                 V2 (fromIntegral winWidth) (fromIntegral winHeight)
+             }
           renderConf = SDL.RendererConfig
              { SDL.rendererType = SDL.AcceleratedVSyncRenderer
              , SDL.rendererTargetTexture = True

@@ -1,18 +1,18 @@
 module Input
-    ( AppInput
-    , parseWinInput
-    , mousePos
-    , lbp
-    , lbpPos
-    , lbDown
-    , rbp
-    , rbpPos
-    , rbDown
-    , keyPress
-    , keyPressed
-    , quitEvent
-    , module SDL.Input.Keyboard.Codes
-    ) where
+  ( AppInput
+  , parseWinInput
+  , mousePos
+  , lbp
+  , lbpPos
+  , lbDown
+  , rbp
+  , rbpPos
+  , rbDown
+  , keyPress
+  , keyPressed
+  , quitEvent
+  , module SDL.Input.Keyboard.Codes
+  ) where
 
 import           Data.Maybe
 
@@ -91,9 +91,9 @@ parseWinInput = accumHoldBy nextAppInput initAppInput
 nextAppInput :: AppInput -> SDL.EventPayload -> AppInput
 -- | When the user closes the window
 nextAppInput inp SDL.QuitEvent = inp { inpQuit = True }
--- | Pressing Q closes the game FIXME: it's A on Azerty not sure how to fix that
+-- | Pressing ESC closes the game
 nextAppInput inp (SDL.KeyboardEvent ev)
-  | SDL.keysymScancode (SDL.keyboardEventKeysym ev) == ScancodeQ
+  | SDL.keysymScancode (SDL.keyboardEventKeysym ev) == ScancodeEscape
     = inp { inpQuit = True }
 -- | Getting mouse coordinates
 nextAppInput inp (SDL.MouseMotionEvent ev) =

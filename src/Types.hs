@@ -19,6 +19,7 @@ data Game = Game { bird   :: Bird
 type WinInput = Event SDL.EventPayload
 type WinOutput = (Game, Bool)
 
+
 initBird :: Bird
 initBird = Bird { birdPos = 300.0, birdVel = 0.0 }
 
