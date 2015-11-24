@@ -21,7 +21,7 @@ type WinOutput = (Game, Bool)
 
 
 initBird :: Bird
-initBird = Bird { birdPos = 300.0, birdVel = 0.0 }
+initBird = Bird { birdPos = 300.0 - 12.0, birdVel = 0.0 }
 
 initSky :: Sky
 initSky = Sky { skyPos = 0.0 }

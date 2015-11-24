@@ -13,17 +13,19 @@ import           Types
 
 fallingBird :: Bird -> SF a Bird
 fallingBird (Bird y0 v0) = proc _ -> do
-  v <- imIntegral v0 -< 250
-  y <- imIntegral y0 -< v
-  returnA -< Bird y v
+  v <- imIntegral v0 -< 0 -- 250
+  y <- imIntegral y0 -< (v*2)
+  -- | this will make the bird fly more "naturally"
+  p <- time >>^ ((6 *) . sin . ((2 * pi) *)) -< ()
+  returnA -< Bird (y+p) v
 
 flappingBird :: Bird -> SF AppInput Bird
 flappingBird bird0 = switch sf cont
-    where sf = proc input -> do
-              b <- fallingBird bird0 -< ()
-              flap <- flapTrigger -< input
-              returnA -< (b, flap `tag` b)
-          cont (Bird y v) = flappingBird (Bird y (v - 250))
+  where sf = proc input -> do
+            b <- fallingBird bird0 -< ()
+            flap <- flapTrigger -< input
+            returnA -< (b, flap `tag` b)
+        cont (Bird y v) = flappingBird (Bird y (v - 150))
 
 movingSky :: Sky -> SF a Sky
 movingSky (Sky x0) = proc _ -> do
@@ -57,9 +59,9 @@ handleExit = quitEvent >>^ isEvent
 
 flapTrigger :: SF AppInput (Event ())
 flapTrigger = proc input -> do
-    mouseTap <- lbp -< input
-    spacebarTap <- keyPressed ScancodeSpace -< input
-    returnA -< mouseTap `lMerge` spacebarTap
+  mouseTap <- lbp -< input
+  spacebarTap <- keyPressed ScancodeSpace -< input
+  returnA -< mouseTap `lMerge` spacebarTap
 
 main :: IO ()
 main = animate "Flappy Haskell" 300 600 (parseWinInput >>> (game &&& handleExit))
