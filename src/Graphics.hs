@@ -6,11 +6,11 @@ import           Control.Applicative
 import           Control.Concurrent
 import           Control.Monad
 import           Data.Text           (Text)
+import           Data.Word
 import           Foreign.C.Types
 import           FRP.Yampa
 import           Linear              hiding (identity)
 import           Linear.Affine
-import           Data.Word
 import           Prelude             hiding (init)
 import           SDL                 (($=))
 import qualified SDL
@@ -68,21 +68,25 @@ renderRepeatedTexture :: SDL.Renderer -> Texture -> CInt -> CInt -> IO ()
 renderRepeatedTexture r t@(Texture _ (V2 width height)) ox oy = do
   renderTexture r t (P (V2 offset (oy-height)))
   renderTexture r t (P (V2 (offset+width) (oy-height)))
-  where offset = ox - (ox `div` width) * width - width
+  where
+    offset = ox - (ox `div` width) * width - width
 
 renderGame :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
 renderGame r t winHeight g = do
   print g
-  let (Bird pos _) = bird g
   -- moving sky
-  renderRepeatedTexture r (skyT t) (round $ skyPos $ sky g) (winHeight-112)
+  renderRepeatedTexture r (skyT t) posSky (winHeight-112)
   -- FIXME render pipes here
-  renderTexture r (pipeDownT t) (P (V2 100 0))
-  renderTexture r (pipeUpT t) (P (V2 100 (winHeight-112-160)))
+  -- renderTexture r (pipeDownT t) (P (V2 100 0))
+  -- renderTexture r (pipeUpT t) (P (V2 100 (winHeight-112-160)))
   -- Moving ground
-  renderRepeatedTexture r (landT t) (round $ groundPos $ ground g) winHeight
+  renderRepeatedTexture r (landT t) posGround winHeight
   -- The animated bird
-  renderTexture r (bird1T t) (P (V2 (138 - 34 `div` 2) (round pos)))
+  renderTexture r (bird1T t) (P (V2 (138 - 34 `div` 2) posBird))
+  where
+    posBird = round $ birdPos $ bird g
+    posGround = round $ groundPos $ ground g
+    posSky = round $ skyPos $ sky g
 
 destroyTextures :: Textures -> IO ()
 destroyTextures ts = do
@@ -131,11 +135,12 @@ animate title winWidth winHeight sf = do
     SDL.destroyWindow window
     SDL.quit
 
-    where windowConf = SDL.defaultWindow
-             { SDL.windowInitialSize =
-                 V2 (fromIntegral winWidth) (fromIntegral winHeight)
-             }
-          renderConf = SDL.RendererConfig
-             { SDL.rendererType = SDL.AcceleratedVSyncRenderer
-             , SDL.rendererTargetTexture = True
-             }
+    where
+      windowConf = SDL.defaultWindow
+         { SDL.windowInitialSize =
+             V2 (fromIntegral winWidth) (fromIntegral winHeight)
+         }
+      renderConf = SDL.RendererConfig
+         { SDL.rendererType = SDL.AcceleratedVSyncRenderer
+         , SDL.rendererTargetTexture = True
+         }
