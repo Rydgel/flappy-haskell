@@ -10,6 +10,7 @@ import           Foreign.C.Types
 import           FRP.Yampa
 import           Linear              hiding (identity)
 import           Linear.Affine
+import           Data.Word
 import           Prelude             hiding (init)
 import           SDL                 (($=))
 import qualified SDL
@@ -27,9 +28,12 @@ data Textures = Textures { bird1T    :: Texture
                          , landT     :: Texture
                          , pipeDownT :: Texture
                          , pipeUpT   :: Texture
+                         , pipe      :: Texture
                          , skyT      :: Texture
                          }
 
+backgroundColor :: V4 Word8
+backgroundColor = V4 55 201 215 maxBound
 
 getSDLTexture :: Texture -> SDL.Texture
 getSDLTexture (Texture t _) = t
@@ -51,21 +55,34 @@ loadTextures r = Textures
              <*> loadTexture r "assets/bird-03.png"
              <*> loadTexture r "assets/bird-04.png"
              <*> loadTexture r "assets/land.png"
-             <*> loadTexture r "assets/pipeDown.png"
-             <*> loadTexture r "assets/PipeUp.png"
+             <*> loadTexture r "assets/pipe-down.png"
+             <*> loadTexture r "assets/pipe-up.png"
+             <*> loadTexture r "assets/pipe.png"
              <*> loadTexture r "assets/sky.png"
 
 renderTexture :: SDL.Renderer -> Texture -> Point V2 CInt -> IO ()
 renderTexture r (Texture t size) xy =
   SDL.copy r t Nothing (Just $ SDL.Rectangle xy size)
 
-renderGame :: SDL.Renderer -> Textures -> Int -> Game -> IO ()
+renderRepeatedTexture :: SDL.Renderer -> Texture -> CInt -> CInt -> IO ()
+renderRepeatedTexture r t@(Texture _ (V2 width height)) ox oy = do
+  renderTexture r t (P (V2 offset (oy-height)))
+  renderTexture r t (P (V2 (offset+width) (oy-height)))
+  where offset = ox - (ox `div` width) * width - width
+
+renderGame :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
 renderGame r t winHeight g = do
   print g
-  let groundP = round $ groundPos $ ground g
   let (Bird pos _) = bird g
-  renderTexture r (landT t) (P (V2 groundP (600 - 112)))
-  renderTexture r (bird1T t) (P (V2 (150 - 34 `div` 2) (round pos)))
+  -- moving sky
+  renderRepeatedTexture r (skyT t) (round $ skyPos $ sky g) (winHeight-112)
+  -- FIXME render pipes here
+  renderTexture r (pipeDownT t) (P (V2 100 0))
+  renderTexture r (pipeUpT t) (P (V2 100 (winHeight-112-160)))
+  -- Moving ground
+  renderRepeatedTexture r (landT t) (round $ groundPos $ ground g) winHeight
+  -- The animated bird
+  renderTexture r (bird1T t) (P (V2 (138 - 34 `div` 2) (round pos)))
 
 destroyTextures :: Textures -> IO ()
 destroyTextures ts = do
@@ -76,6 +93,7 @@ destroyTextures ts = do
   SDL.destroyTexture $ getSDLTexture $ landT ts
   SDL.destroyTexture $ getSDLTexture $ pipeDownT ts
   SDL.destroyTexture $ getSDLTexture $ pipeUpT ts
+  SDL.destroyTexture $ getSDLTexture $ pipe ts
   SDL.destroyTexture $ getSDLTexture $ skyT ts
 
 animate :: Text                  -- ^ window title
@@ -88,7 +106,7 @@ animate title winWidth winHeight sf = do
     window <- SDL.createWindow title windowConf
     SDL.showWindow window
     renderer <- SDL.createRenderer window (-1) renderConf
-    SDL.rendererDrawColor renderer $= V4 maxBound maxBound maxBound maxBound
+    SDL.rendererDrawColor renderer $= backgroundColor
     textures <- loadTextures renderer
 
     lastInteraction <- newMVar =<< SDL.time
@@ -102,7 +120,7 @@ animate title winWidth winHeight sf = do
         renderOutput changed (obj, shouldExit) = do
           when changed $ do
               SDL.clear renderer
-              renderGame renderer textures winHeight obj
+              renderGame renderer textures (fromIntegral winHeight) obj
               SDL.present renderer
           return shouldExit
 

@@ -29,12 +29,12 @@ flappingBird bird0 = switch sf cont
 
 movingSky :: Sky -> SF a Sky
 movingSky (Sky x0) = proc _ -> do
-  x <- imIntegral x0 -< -50
+  x <- imIntegral x0 -< -20
   returnA -< Sky x
 
 movingGround :: Ground -> SF a Ground
 movingGround (Ground x0) = proc _ -> do
-  x <- imIntegral x0 -< -100
+  x <- imIntegral x0 -< -70
   returnA -< Ground x
 
 checkCollision :: Game -> Bool
@@ -64,4 +64,4 @@ flapTrigger = proc input -> do
   returnA -< mouseTap `lMerge` spacebarTap
 
 main :: IO ()
-main = animate "Flappy Haskell" 300 600 (parseWinInput >>> (game &&& handleExit))
+main = animate "Flappy Haskell" 276 600 (parseWinInput >>> (game &&& handleExit))
