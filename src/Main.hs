@@ -12,12 +12,12 @@ import           Types
 
 
 fallingBird :: Bird -> SF a Bird
-fallingBird (Bird y0 v0) = proc _ -> do
-  v <- imIntegral v0 -< 0 -- 250
-  y <- imIntegral y0 -< (v*2)
-  -- | this will make the bird fly more "naturally"
-  p <- time >>^ ((6 *) . sin . ((2 * pi) *)) -< ()
-  returnA -< Bird (y+p) v
+fallingBird (Bird y0 v0 s0) = proc _ -> do
+  v <- imIntegral v0 -< 0                          -- 250 -- ^ velocity
+  y <- imIntegral y0 -< (v*2)                      -- ^ position
+  s <- imIntegral s0 -< 15                         -- ^ to handle bird sprite animation state
+  p <- time >>^ ((6 *) . sin . ((2 * pi) *)) -< () -- ^ this will make the bird fly more "naturally"
+  returnA -< Bird (y+p) v s
 
 flappingBird :: Bird -> SF AppInput Bird
 flappingBird bird0 = switch sf cont
@@ -25,7 +25,7 @@ flappingBird bird0 = switch sf cont
             b <- fallingBird bird0 -< ()
             flap <- flapTrigger -< input
             returnA -< (b, flap `tag` b)
-        cont (Bird y v) = flappingBird (Bird y (v - 150))
+        cont (Bird y v s) = flappingBird $ Bird y (v - 150) s
 
 movingSky :: Sky -> SF a Sky
 movingSky (Sky x0) = proc _ -> do
@@ -38,7 +38,7 @@ movingGround (Ground x0) = proc _ -> do
   returnA -< Ground x
 
 checkCollision :: Game -> Bool
-checkCollision _ = True
+checkCollision _ = False
 
 gameSession :: SF AppInput Game
 gameSession = proc input -> do

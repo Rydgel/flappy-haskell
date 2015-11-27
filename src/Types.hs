@@ -3,8 +3,9 @@ module Types where
 import           FRP.Yampa
 import qualified SDL
 
-data Bird = Bird { birdPos :: Double
-                 , birdVel :: Double
+data Bird = Bird { birdPos   :: Double
+                 , birdVel   :: Double
+                 , birdState :: Double
                  } deriving (Show)
 
 data Sky = Sky { skyPos :: Double } deriving (Show)
@@ -21,7 +22,7 @@ type WinOutput = (Game, Bool)
 
 
 initBird :: Bird
-initBird = Bird { birdPos = 276.0 - 12.0, birdVel = 0.0 }
+initBird = Bird { birdPos = 276.0 - 12.0, birdVel = 0.0, birdState = 0.0 }
 
 initSky :: Sky
 initSky = Sky { skyPos = 0.0 }

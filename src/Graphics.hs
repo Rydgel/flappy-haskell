@@ -64,6 +64,10 @@ renderTexture :: SDL.Renderer -> Texture -> Point V2 CInt -> IO ()
 renderTexture r (Texture t size) xy =
   SDL.copy r t Nothing (Just $ SDL.Rectangle xy size)
 
+renderTextureRotated :: SDL.Renderer -> Texture -> Point V2 CInt -> CDouble -> IO ()
+renderTextureRotated r (Texture t size) xy ang =
+  SDL.copyEx r t Nothing (Just $ SDL.Rectangle xy size) ang Nothing (V2 False False)
+
 renderRepeatedTexture :: SDL.Renderer -> Texture -> CInt -> CInt -> IO ()
 renderRepeatedTexture r t@(Texture _ (V2 width height)) ox oy = do
   renderTexture r t (P (V2 offset (oy-height)))
@@ -71,9 +75,29 @@ renderRepeatedTexture r t@(Texture _ (V2 width height)) ox oy = do
   where
     offset = ox - (ox `div` width) * width - width
 
+birdSpriteFromState :: Int -> Textures -> Texture
+birdSpriteFromState n t = case n `mod` 4 of
+  0 -> bird1T t
+  1 -> bird2T t
+  2 -> bird3T t
+  3 -> bird4T t
+  _ -> bird1T t
+
+birdAngleFromVelocity :: Double -> CDouble
+birdAngleFromVelocity v = 45.0
+
+renderBird :: SDL.Renderer -> Textures -> Bird -> IO ()
+renderBird r t b = renderTextureRotated r birdSprite (P (V2 center posBird)) angleBird
+  where
+    center = 138 - 34 `div` 2
+    posBird = round $ birdPos b
+    stateBird = round $ birdState b :: Int
+    angleBird = birdAngleFromVelocity $ birdVel b
+    birdSprite = birdSpriteFromState (stateBird `mod` 4) t
+
 renderGame :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
 renderGame r t winHeight g = do
-  print g
+  -- print g
   -- moving sky
   renderRepeatedTexture r (skyT t) posSky (winHeight-112)
   -- FIXME render pipes here
@@ -82,9 +106,8 @@ renderGame r t winHeight g = do
   -- Moving ground
   renderRepeatedTexture r (landT t) posGround winHeight
   -- The animated bird
-  renderTexture r (bird1T t) (P (V2 (138 - 34 `div` 2) posBird))
+  renderBird r t (bird g)
   where
-    posBird = round $ birdPos $ bird g
     posGround = round $ groundPos $ ground g
     posSky = round $ skyPos $ sky g
 
@@ -107,6 +130,7 @@ animate :: Text                  -- ^ window title
         -> IO ()
 animate title winWidth winHeight sf = do
     SDL.initialize [SDL.InitVideo]
+    SDL.HintRenderScaleQuality $= SDL.ScaleBest
     window <- SDL.createWindow title windowConf
     SDL.showWindow window
     renderer <- SDL.createRenderer window (-1) renderConf
@@ -139,6 +163,7 @@ animate title winWidth winHeight sf = do
       windowConf = SDL.defaultWindow
          { SDL.windowInitialSize =
              V2 (fromIntegral winWidth) (fromIntegral winHeight)
+         , SDL.windowOpenGL = Just SDL.defaultOpenGL
          }
       renderConf = SDL.RendererConfig
          { SDL.rendererType = SDL.AcceleratedVSyncRenderer
