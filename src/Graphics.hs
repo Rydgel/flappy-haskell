@@ -84,15 +84,20 @@ birdSpriteFromState n t = case n `mod` 4 of
   _ -> bird1T t
 
 birdAngleFromVelocity :: Double -> CDouble
-birdAngleFromVelocity v = 45.0
+birdAngleFromVelocity v = realToFrac $ checkMaxRot$ v / 3
+  where
+    checkMaxRot v' | v' > 90.0  = 90.0
+                   | v' < -90.0 = -90.0
+    checkMaxRot v'              = v'
 
 renderBird :: SDL.Renderer -> Textures -> Bird -> IO ()
-renderBird r t b = renderTextureRotated r birdSprite (P (V2 center posBird)) angleBird
+renderBird r t b = renderTextureRotated r birdSprite coord angleBird
   where
-    center = 138 - 34 `div` 2
-    posBird = round $ birdPos b
-    stateBird = round $ birdState b :: Int
-    angleBird = birdAngleFromVelocity $ birdVel b
+    center     = 138 - 34 `div` 2
+    coord      = P (V2 center posBird)
+    posBird    = round $ birdPos b
+    stateBird  = round $ birdState b :: Int
+    angleBird  = birdAngleFromVelocity $ birdVel b
     birdSprite = birdSpriteFromState (stateBird `mod` 4) t
 
 renderGame :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
@@ -167,5 +172,5 @@ animate title winWidth winHeight sf = do
          }
       renderConf = SDL.RendererConfig
          { SDL.rendererType = SDL.AcceleratedVSyncRenderer
-         , SDL.rendererTargetTexture = True
+         , SDL.rendererTargetTexture = False
          }

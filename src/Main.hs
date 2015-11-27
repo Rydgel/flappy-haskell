@@ -13,7 +13,7 @@ import           Types
 
 fallingBird :: Bird -> SF a Bird
 fallingBird (Bird y0 v0 s0) = proc _ -> do
-  v <- imIntegral v0 -< 0                          -- 250 -- ^ velocity
+  v <- imIntegral v0 -< 250                        -- ^ velocity
   y <- imIntegral y0 -< (v*2)                      -- ^ position
   s <- imIntegral s0 -< 15                         -- ^ to handle bird sprite animation state
   p <- time >>^ ((6 *) . sin . ((2 * pi) *)) -< () -- ^ this will make the bird fly more "naturally"
