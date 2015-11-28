@@ -87,7 +87,7 @@ birdAngleFromVelocity :: Double -> CDouble
 birdAngleFromVelocity v = realToFrac $ checkMaxRot$ v / 3
   where
     checkMaxRot v' | v' > 90.0  = 90.0
-                   | v' < -90.0 = -90.0
+                   | v' < -45.0 = -45.0
     checkMaxRot v'              = v'
 
 renderBird :: SDL.Renderer -> Textures -> Bird -> IO ()
