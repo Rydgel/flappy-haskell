@@ -19,7 +19,8 @@ cabal-version:       >=1.10
 executable flappy-haskell
   main-is:             Main.hs
   other-modules:       Types,
-                       Graphics,
+                       Audio,
+                       Rendering,
                        Input
   -- other-extensions:
   build-depends:       base >= 4.8 && <4.9,

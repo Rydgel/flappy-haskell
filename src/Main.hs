@@ -6,7 +6,7 @@ module Main (main) where
 import           FRP.Yampa
 import           Prelude   hiding (init)
 
-import           Graphics
+import           Rendering
 import           Input
 import           Types
 
@@ -25,7 +25,7 @@ flappingBird bird0 = switch sf cont
             b <- fallingBird bird0 -< ()
             flap <- flapTrigger -< input
             returnA -< (b, flap `tag` b)
-        cont (Bird y v s) = flappingBird $ Bird y (v - 150) s
+        cont (Bird y _ s) = flappingBird $ Bird y (-130) s
 
 movingSky :: Sky -> SF a Sky
 movingSky (Sky x0) = proc _ -> do

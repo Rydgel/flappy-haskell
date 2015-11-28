@@ -3,18 +3,18 @@ module Types where
 import           FRP.Yampa
 import qualified SDL
 
-data Bird = Bird { birdPos   :: Double
-                 , birdVel   :: Double
-                 , birdState :: Double
+data Bird = Bird { birdPos    :: !Double
+                 , birdVel    :: !Double
+                 , birdState  :: !Double
                  } deriving (Show)
 
-data Sky = Sky { skyPos :: Double } deriving (Show)
+data Sky = Sky { skyPos :: !Double } deriving (Show)
 
-data Ground = Ground { groundPos :: Double } deriving (Show)
+data Ground = Ground { groundPos :: !Double } deriving (Show)
 
-data Game = Game { bird   :: Bird
-                 , sky    :: Sky
-                 , ground :: Ground
+data Game = Game { bird   :: !Bird
+                 , sky    :: !Sky
+                 , ground :: !Ground
                  } deriving (Show)
 
 type WinInput = Event SDL.EventPayload

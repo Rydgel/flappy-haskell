@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Graphics (animate) where
+module Rendering (animate) where
 
 import           Control.Applicative
 import           Control.Concurrent
@@ -16,21 +16,29 @@ import           SDL                 (($=))
 import qualified SDL
 import qualified SDL.Image
 
+import           Audio
 import           Types
 
 
 data Texture = Texture SDL.Texture (V2 CInt)
 
-data Textures = Textures { bird1T    :: Texture
-                         , bird2T    :: Texture
-                         , bird3T    :: Texture
-                         , bird4T    :: Texture
-                         , landT     :: Texture
-                         , pipeDownT :: Texture
-                         , pipeUpT   :: Texture
-                         , pipe      :: Texture
-                         , skyT      :: Texture
+data Textures = Textures { bird1T    :: !Texture
+                         , bird2T    :: !Texture
+                         , bird3T    :: !Texture
+                         , bird4T    :: !Texture
+                         , landT     :: !Texture
+                         , pipeDownT :: !Texture
+                         , pipeUpT   :: !Texture
+                         , pipe      :: !Texture
+                         , skyT      :: !Texture
                          }
+
+data SFX = SFX { dieA    :: !Audio
+               , hitA    :: !Audio
+               , pointA  :: !Audio
+               , swooshA :: !Audio
+               , wingA   :: !Audio
+               }
 
 backgroundColor :: V4 Word8
 backgroundColor = V4 55 201 215 maxBound
@@ -59,6 +67,34 @@ loadTextures r = Textures
              <*> loadTexture r "assets/pipe-up.png"
              <*> loadTexture r "assets/pipe.png"
              <*> loadTexture r "assets/sky.png"
+
+destroyTextures :: Textures -> IO ()
+destroyTextures ts = do
+  SDL.destroyTexture $ getSDLTexture $ bird1T ts
+  SDL.destroyTexture $ getSDLTexture $ bird2T ts
+  SDL.destroyTexture $ getSDLTexture $ bird3T ts
+  SDL.destroyTexture $ getSDLTexture $ bird4T ts
+  SDL.destroyTexture $ getSDLTexture $ landT ts
+  SDL.destroyTexture $ getSDLTexture $ pipeDownT ts
+  SDL.destroyTexture $ getSDLTexture $ pipeUpT ts
+  SDL.destroyTexture $ getSDLTexture $ pipe ts
+  SDL.destroyTexture $ getSDLTexture $ skyT ts
+
+loadAudios :: IO SFX
+loadAudios = SFX
+         <$> loadAudio "assets/sounds/sfx_die.ogg"
+         <*> loadAudio "assets/sounds/sfx_hit.ogg"
+         <*> loadAudio "assets/sounds/sfx_point.ogg"
+         <*> loadAudio "assets/sounds/sfx_swooshing.ogg"
+         <*> loadAudio "assets/sounds/sfx_wing.ogg"
+
+destroyAudios :: SFX -> IO ()
+destroyAudios as = do
+  destroyAudio $ unAudio $ dieA as
+  destroyAudio $ unAudio $ hitA as
+  destroyAudio $ unAudio $ pointA as
+  destroyAudio $ unAudio $ swooshA as
+  destroyAudio $ unAudio $ wingA as
 
 renderTexture :: SDL.Renderer -> Texture -> Point V2 CInt -> IO ()
 renderTexture r (Texture t size) xy =
@@ -100,8 +136,8 @@ renderBird r t b = renderTextureRotated r birdSprite coord angleBird
     angleBird  = birdAngleFromVelocity $ birdVel b
     birdSprite = birdSpriteFromState (stateBird `mod` 4) t
 
-renderGame :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
-renderGame r t winHeight g = do
+renderDisplay :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
+renderDisplay r t winHeight g = do
   -- print g
   -- moving sky
   renderRepeatedTexture r (skyT t) posSky (winHeight-112)
@@ -116,17 +152,9 @@ renderGame r t winHeight g = do
     posGround = round $ groundPos $ ground g
     posSky = round $ skyPos $ sky g
 
-destroyTextures :: Textures -> IO ()
-destroyTextures ts = do
-  SDL.destroyTexture $ getSDLTexture $ bird1T ts
-  SDL.destroyTexture $ getSDLTexture $ bird2T ts
-  SDL.destroyTexture $ getSDLTexture $ bird3T ts
-  SDL.destroyTexture $ getSDLTexture $ bird4T ts
-  SDL.destroyTexture $ getSDLTexture $ landT ts
-  SDL.destroyTexture $ getSDLTexture $ pipeDownT ts
-  SDL.destroyTexture $ getSDLTexture $ pipeUpT ts
-  SDL.destroyTexture $ getSDLTexture $ pipe ts
-  SDL.destroyTexture $ getSDLTexture $ skyT ts
+renderSounds :: SFX -> Game -> IO ()
+renderSounds as g =
+  when (birdVel (bird g) == -130) $ playFile (wingA as) 1
 
 animate :: Text                  -- ^ window title
         -> Int                   -- ^ window width in pixels
@@ -134,8 +162,10 @@ animate :: Text                  -- ^ window title
         -> SF WinInput WinOutput -- ^ signal function to animate
         -> IO ()
 animate title winWidth winHeight sf = do
-    SDL.initialize [SDL.InitVideo]
+    SDL.initialize [SDL.InitVideo, SDL.InitAudio]
     SDL.HintRenderScaleQuality $= SDL.ScaleBest
+    initAudio
+    audios <- loadAudios
     window <- SDL.createWindow title windowConf
     SDL.showWindow window
     renderer <- SDL.createRenderer window (-1) renderConf
@@ -150,16 +180,18 @@ animate title winWidth winHeight sf = do
           mEvent <- SDL.pollEvent
           return (dt, Event . SDL.eventPayload <$> mEvent)
 
-        renderOutput changed (obj, shouldExit) = do
+        renderOutput changed (gameState, shouldExit) = do
           when changed $ do
               SDL.clear renderer
-              renderGame renderer textures (fromIntegral winHeight) obj
+              renderDisplay renderer textures (fromIntegral winHeight) gameState
+              renderSounds audios gameState
               SDL.present renderer
           return shouldExit
 
     reactimate (return NoEvent) senseInput renderOutput sf
 
     destroyTextures textures
+    destroyAudios audios
     SDL.destroyRenderer renderer
     SDL.destroyWindow window
     SDL.quit
