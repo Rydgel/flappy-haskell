@@ -1,6 +1,7 @@
 packages:
 - '.'
 - sdl2-image
+- sdl2-mixer
 extra-deps:
 - sdl2-2.1.0
 - Yampa-0.10.3

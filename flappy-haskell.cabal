@@ -25,6 +25,7 @@ executable flappy-haskell
   build-depends:       base >= 4.8 && <4.9,
                        sdl2 >= 2.1.0,
                        sdl2-image == 0.2,
+                       sdl2-mixer == 0.1,
                        Yampa >= 0.10.3,
                        linear,
                        text,
