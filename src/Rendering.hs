@@ -129,8 +129,7 @@ birdAngleFromVelocity v = realToFrac $ checkMaxRot$ v / 3
 renderBird :: SDL.Renderer -> Textures -> Bird -> IO ()
 renderBird r t b = renderTextureRotated r birdSprite coord angleBird
   where
-    center     = 138 - 34 `div` 2
-    coord      = P (V2 center posBird)
+    coord      = P (V2 75 posBird)
     posBird    = round $ birdPos b
     stateBird  = round $ birdState b :: Int
     angleBird  = birdAngleFromVelocity $ birdVel b
