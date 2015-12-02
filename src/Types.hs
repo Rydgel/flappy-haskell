@@ -29,3 +29,6 @@ initSky = Sky { skyPos = 0.0 }
 
 initGround :: Ground
 initGround = Ground { groundPos = 0.0 }
+
+flapVelocity :: Double
+flapVelocity = -130.0

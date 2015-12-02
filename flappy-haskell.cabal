@@ -19,6 +19,7 @@ cabal-version:       >=1.10
 executable flappy-haskell
   main-is:             Main.hs
   other-modules:       Types,
+                       Game,
                        Audio,
                        Rendering,
                        Input

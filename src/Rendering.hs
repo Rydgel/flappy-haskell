@@ -16,8 +16,9 @@ import           SDL                 (($=))
 import qualified SDL
 import qualified SDL.Image
 
-import           Audio
 import           Types
+import           Game
+import           Audio
 
 
 data Texture = Texture SDL.Texture (V2 CInt)
@@ -152,8 +153,11 @@ renderDisplay r t winHeight g = do
     posSky = round $ skyPos $ sky g
 
 renderSounds :: SFX -> Game -> IO ()
-renderSounds as g =
-  when (birdVel (bird g) == -130) $ playFile (wingA as) 1
+renderSounds as g = do
+  when (birdVel (bird g) == flapVelocity) $
+    playFile (wingA as) 1
+  when (checkCollision g) $
+    playFile (dieA as) 3
 
 animate :: Text                  -- ^ window title
         -> Int                   -- ^ window width in pixels
