@@ -12,9 +12,15 @@ data Sky = Sky { skyPos :: !Double } deriving (Show)
 
 data Ground = Ground { groundPos :: !Double } deriving (Show)
 
+data Pipes = Pipes { pipeUp   :: !Double
+                   , pipeDown :: !Double
+                   , pipePos  :: !Double
+                   } deriving (Show)
+
 data Game = Game { bird   :: !Bird
                  , sky    :: !Sky
                  , ground :: !Ground
+                 , pipes  :: ![Pipes]
                  } deriving (Show)
 
 type WinInput = Event SDL.EventPayload

@@ -136,14 +136,17 @@ renderBird r t b = renderTextureRotated r birdSprite coord angleBird
     angleBird  = birdAngleFromVelocity $ birdVel b
     birdSprite = birdSpriteFromState (stateBird `mod` 4) t
 
+renderPipes :: SDL.Renderer -> Textures -> CInt -> [Pipes] -> IO ()
+renderPipes r t wh ps = forM_ ps $ \p -> do
+  putStr "FIXME"
+
 renderDisplay :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
 renderDisplay r t winHeight g = do
-  -- print g
+  print g
   -- moving sky
   renderRepeatedTexture r (skyT t) posSky (winHeight-112)
-  -- FIXME render pipes here
-  -- renderTexture r (pipeDownT t) (P (V2 100 0))
-  -- renderTexture r (pipeUpT t) (P (V2 100 (winHeight-112-160)))
+  -- Rendering pipes
+  renderPipes r t winHeight (pipes g)
   -- Moving ground
   renderRepeatedTexture r (landT t) posGround winHeight
   -- The animated bird

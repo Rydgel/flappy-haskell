@@ -36,12 +36,19 @@ movingGround (Ground x0) = proc _ -> do
   x <- imIntegral x0 -< -70
   returnA -< Ground x
 
+movingPipes :: [Pipes] -> SF a [Pipes]
+movingPipes _ = proc _ -> do
+  -- FIXME pipes logic, move them, generate them randomly
+  let p = Pipes 100.0 150.0 200.0
+  returnA -< [p]
+
 gameSession :: SF AppInput Game
 gameSession = proc input -> do
   b <- flappingBird initBird -< input
   s <- movingSky initSky -< ()
   g <- movingGround initGround -< ()
-  returnA -< Game { bird = b, sky = s, ground = g }
+  p <- movingPipes [] -< ()
+  returnA -< Game { bird = b, sky = s, ground = g, pipes = p }
 
 game :: SF AppInput Game
 game = switch sf (const game)
