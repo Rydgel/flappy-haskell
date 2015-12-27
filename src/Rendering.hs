@@ -30,7 +30,7 @@ data Textures = Textures { bird1T    :: !Texture
                          , landT     :: !Texture
                          , pipeDownT :: !Texture
                          , pipeUpT   :: !Texture
-                         , pipe      :: !Texture
+                         , pipeT     :: !Texture
                          , skyT      :: !Texture
                          }
 
@@ -78,7 +78,7 @@ destroyTextures ts = do
   SDL.destroyTexture $ getSDLTexture $ landT ts
   SDL.destroyTexture $ getSDLTexture $ pipeDownT ts
   SDL.destroyTexture $ getSDLTexture $ pipeUpT ts
-  SDL.destroyTexture $ getSDLTexture $ pipe ts
+  SDL.destroyTexture $ getSDLTexture $ pipeT ts
   SDL.destroyTexture $ getSDLTexture $ skyT ts
 
 loadAudios :: IO SFX
@@ -112,6 +112,11 @@ renderRepeatedTexture r t@(Texture _ (V2 width height)) ox oy = do
   where
     offset = ox - (ox `div` width) * width - width
 
+renderRepeatedTextureY :: SDL.Renderer -> Texture -> CInt -> [CInt] -> IO ()
+renderRepeatedTextureY r t ox xs =
+  forM_ xs $ \oy ->
+    renderTexture r t (P (V2 ox oy))
+
 birdSpriteFromState :: Int -> Textures -> Texture
 birdSpriteFromState n t = case n `mod` 4 of
   0 -> bird1T t
@@ -138,7 +143,19 @@ renderBird r t b = renderTextureRotated r birdSprite coord angleBird
 
 renderPipes :: SDL.Renderer -> Textures -> CInt -> [Pipes] -> IO ()
 renderPipes r t wh ps = forM_ ps $ \p -> do
-  putStr "FIXME"
+  let posX          = round $ pipePos p
+      topPipeHeight = round $ pipeUp p
+      botPipeHeight = round $ pipeDown p
+      pipeUpY       = wh - botPipeHeight
+      pipeDownY     = topPipeHeight
+      pipeDownFills = [0..pipeDownY]
+      pipeUpFills   = [(pipeUpY+26)..wh]
+  -- pipe down
+  renderTexture r (pipeDownT t) (P (V2 posX pipeDownY))
+  renderRepeatedTextureY r (pipeT t) posX pipeDownFills
+  -- pipe up
+  renderTexture r (pipeUpT t) (P (V2 posX pipeUpY))
+  renderRepeatedTextureY r (pipeT t) posX pipeUpFills
 
 renderDisplay :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
 renderDisplay r t winHeight g = do
