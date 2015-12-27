@@ -1,6 +1,5 @@
 module Graphics
     (Texture(..),
-     getSDLTexture,
      loadTexture,
      renderTexture,
      renderTextureRotated,
@@ -16,10 +15,9 @@ import qualified SDL
 import qualified SDL.Image
 
 
-data Texture = Texture SDL.Texture (V2 CInt)
-
-getSDLTexture :: Texture -> SDL.Texture
-getSDLTexture (Texture t _) = t
+data Texture = Texture { getSDLTexture :: SDL.Texture
+                       , coord         :: V2 CInt
+                       }
 
 loadTexture :: SDL.Renderer -> FilePath -> IO Texture
 loadTexture r filePath = do
