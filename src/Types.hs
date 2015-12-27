@@ -20,7 +20,7 @@ data Pipes = Pipes { pipeUp   :: !Double
 data Game = Game { bird   :: !Bird
                  , sky    :: !Sky
                  , ground :: !Ground
-                 , pipes  :: ![Pipes]
+                 , pipes  :: !Pipes
                  } deriving (Show)
 
 type WinInput = Event SDL.EventPayload
@@ -36,5 +36,8 @@ initSky = Sky { skyPos = 0.0 }
 initGround :: Ground
 initGround = Ground { groundPos = 0.0 }
 
+initPipes :: Pipes
+initPipes = Pipes 200.0 300.0 300.0
+
 flapVelocity :: Double
-flapVelocity = -130.0
+flapVelocity = -100.0
