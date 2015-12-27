@@ -56,7 +56,7 @@ gameSession rng = proc input -> do
   s <- movingSky initSky -< ()
   g <- movingGround initGround -< ()
   p <- movingPipes rng initPipes -< ()
-  returnA -< Game { bird = b, sky = s, ground = g, pipes = p }
+  returnA -< Game { bird = b, sky = s, ground = g, pipes = p, score = 0 }
 
 game :: RandomGen g => g -> SF AppInput Game
 game rng = switch sf $ const $ game rng

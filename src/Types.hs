@@ -21,6 +21,7 @@ data Game = Game { bird   :: !Bird
                  , sky    :: !Sky
                  , ground :: !Ground
                  , pipes  :: !Pipes
+                 , score  :: !Int
                  } deriving (Show)
 
 type WinInput = Event SDL.EventPayload

@@ -22,7 +22,8 @@ executable flappy-haskell
                        Game,
                        Audio,
                        Rendering,
-                       Input
+                       Input,
+                       Graphics
   -- other-extensions:
   build-depends:       base >= 4.8 && <4.9,
                        sdl2 >= 2.1.0,

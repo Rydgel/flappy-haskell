@@ -14,14 +14,12 @@ import           Linear.Affine
 import           Prelude             hiding (init)
 import           SDL                 (($=))
 import qualified SDL
-import qualified SDL.Image
 
 import           Types
 import           Game
 import           Audio
+import           Graphics
 
-
-data Texture = Texture SDL.Texture (V2 CInt)
 
 data Textures = Textures { bird1T    :: !Texture
                          , bird2T    :: !Texture
@@ -43,19 +41,6 @@ data SFX = SFX { dieA    :: !Audio
 
 backgroundColor :: V4 Word8
 backgroundColor = V4 55 201 215 maxBound
-
-getSDLTexture :: Texture -> SDL.Texture
-getSDLTexture (Texture t _) = t
-
-loadTexture :: SDL.Renderer -> FilePath -> IO Texture
-loadTexture r filePath = do
-  surface <- SDL.Image.load filePath
-  size <- SDL.surfaceDimensions surface
-  let key = V4 0 maxBound maxBound maxBound
-  SDL.surfaceColorKey surface $= Just key
-  t <- SDL.createTextureFromSurface r surface
-  SDL.freeSurface surface
-  return (Texture t size)
 
 loadTextures :: SDL.Renderer -> IO Textures
 loadTextures r = Textures
@@ -97,25 +82,6 @@ destroyAudios as = do
   destroyAudio $ unAudio $ swooshA as
   destroyAudio $ unAudio $ wingA as
 
-renderTexture :: SDL.Renderer -> Texture -> Point V2 CInt -> IO ()
-renderTexture r (Texture t size) xy =
-  SDL.copy r t Nothing (Just $ SDL.Rectangle xy size)
-
-renderTextureRotated :: SDL.Renderer -> Texture -> Point V2 CInt -> CDouble -> IO ()
-renderTextureRotated r (Texture t size) xy ang =
-  SDL.copyEx r t Nothing (Just $ SDL.Rectangle xy size) ang Nothing (V2 False False)
-
-renderRepeatedTexture :: SDL.Renderer -> Texture -> CInt -> CInt -> IO ()
-renderRepeatedTexture r t@(Texture _ (V2 width height)) ox oy = do
-  renderTexture r t (P (V2 offset (oy-height)))
-  renderTexture r t (P (V2 (offset+width) (oy-height)))
-  where
-    offset = ox - (ox `div` width) * width - width
-
-renderRepeatedTextureY :: SDL.Renderer -> Texture -> CInt -> [CInt] -> IO ()
-renderRepeatedTextureY r t ox xs =
-  forM_ xs $ \oy ->
-    renderTexture r t (P (V2 ox oy))
 
 birdSpriteFromState :: Int -> Textures -> Texture
 birdSpriteFromState n t = case n `mod` 4 of
@@ -159,7 +125,7 @@ renderPipes r t wh p = do
 
 renderDisplay :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
 renderDisplay r t winHeight g = do
-  -- print g
+  print g
   -- moving sky
   renderRepeatedTexture r (skyT t) posSky (winHeight-112)
   -- Rendering pipes
