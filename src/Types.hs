@@ -22,6 +22,7 @@ data Game = Game { bird   :: !Bird
                  , ground :: !Ground
                  , pipes  :: !Pipes
                  , score  :: !Int
+                 , eltime :: !Double
                  } deriving (Show)
 
 type WinInput = Event SDL.EventPayload
@@ -38,7 +39,7 @@ initGround :: Ground
 initGround = Ground { groundPos = 0.0 }
 
 initPipes :: Pipes
-initPipes = Pipes 200.0 300.0 300.0
+initPipes = Pipes 200.0 300.0 275.0
 
 flapVelocity :: Double
 flapVelocity = -100.0

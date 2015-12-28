@@ -1,5 +1,7 @@
 {-# LANGUAGE Arrows            #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
+
 
 module Game where
 
@@ -56,7 +58,9 @@ gameSession rng = proc input -> do
   s <- movingSky initSky -< ()
   g <- movingGround initGround -< ()
   p <- movingPipes rng initPipes -< ()
-  returnA -< Game { bird = b, sky = s, ground = g, pipes = p, score = 0 }
+  t <- time -< ()
+  scr <- time >>^ (round . (/ 3.55)) -< ()
+  returnA -< Game b s g p scr t
 
 game :: RandomGen g => g -> SF AppInput Game
 game rng = switch sf $ const $ game rng
@@ -75,4 +79,4 @@ flapTrigger = proc input -> do
   returnA -< mouseTap `lMerge` spacebarTap
 
 checkCollision :: Game -> Bool
-checkCollision _ = False
+checkCollision Game{..} = score == 15

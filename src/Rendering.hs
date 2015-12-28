@@ -9,11 +9,13 @@ import           Data.Text           (Text)
 import           Data.Word
 import           Foreign.C.Types
 import           FRP.Yampa
+import           Data.List           (genericLength)
 import           Linear              hiding (identity)
 import           Linear.Affine
 import           Prelude             hiding (init)
 import           SDL                 (($=))
 import qualified SDL
+import qualified Data.HashMap.Strict as M
 
 import           Types
 import           Game
@@ -31,6 +33,8 @@ data Textures = Textures { bird1T    :: !Texture
                          , pipeT     :: !Texture
                          , skyT      :: !Texture
                          }
+
+type DigitsTextures = M.HashMap Char Texture
 
 data SFX = SFX { dieA    :: !Audio
                , hitA    :: !Audio
@@ -66,6 +70,23 @@ destroyTextures ts = do
   SDL.destroyTexture $ getSDLTexture $ pipeT ts
   SDL.destroyTexture $ getSDLTexture $ skyT ts
 
+loadDigitsTextures :: SDL.Renderer -> IO DigitsTextures
+loadDigitsTextures r = mapM (loadTexture r) $
+  M.fromList [ ('0', "assets/font_big_0.png")
+             , ('1', "assets/font_big_1.png")
+             , ('2', "assets/font_big_2.png")
+             , ('3', "assets/font_big_3.png")
+             , ('4', "assets/font_big_4.png")
+             , ('5', "assets/font_big_5.png")
+             , ('6', "assets/font_big_6.png")
+             , ('7', "assets/font_big_7.png")
+             , ('8', "assets/font_big_8.png")
+             , ('9', "assets/font_big_9.png")
+             ]
+
+destroyDigitsTextures :: DigitsTextures -> IO ()
+destroyDigitsTextures = mapM_ (SDL.destroyTexture . getSDLTexture)
+
 loadAudios :: IO SFX
 loadAudios = SFX
          <$> loadAudio "assets/sounds/sfx_die.ogg"
@@ -81,7 +102,6 @@ destroyAudios as = do
   destroyAudio $ unAudio $ pointA as
   destroyAudio $ unAudio $ swooshA as
   destroyAudio $ unAudio $ wingA as
-
 
 birdSpriteFromState :: Int -> Textures -> Texture
 birdSpriteFromState n t = case n `mod` 4 of
@@ -99,9 +119,9 @@ birdAngleFromVelocity v = realToFrac $ checkMaxRot$ v / 3
     checkMaxRot v'              = v'
 
 renderBird :: SDL.Renderer -> Textures -> Bird -> IO ()
-renderBird r t b = renderTextureRotated r birdSprite coord angleBird
+renderBird r t b = renderTextureRotated r birdSprite cxy angleBird
   where
-    coord      = P (V2 75 posBird)
+    cxy        = P (V2 75 posBird)
     posBird    = round $ birdPos b
     stateBird  = round $ birdState b :: Int
     angleBird  = birdAngleFromVelocity $ birdVel b
@@ -123,9 +143,20 @@ renderPipes r t wh p = do
   renderTexture r (pipeUpT t) (P (V2 posX pipeUpY))
   renderRepeatedTextureY r (pipeT t) posX pipeUpFills
 
-renderDisplay :: SDL.Renderer -> Textures -> CInt -> Game -> IO ()
-renderDisplay r t winHeight g = do
-  print g
+renderDigit :: SDL.Renderer -> DigitsTextures -> Char -> Point V2 CInt -> IO ()
+renderDigit r dt c = renderTexture r $ (M.!) dt c
+
+renderScore :: SDL.Renderer -> DigitsTextures -> Int -> IO ()
+renderScore r dt scoreInt = do
+  let stringScore = show scoreInt
+      totalWidth  = 28.0 * genericLength stringScore
+      screenW     = 276.0 :: Double
+      start       = round $ (screenW - totalWidth) / 2
+  foldM_ (\z c -> renderDigit r dt c (P (V2 z 25)) >> return (z+28)) start stringScore
+
+renderDisplay :: SDL.Renderer -> Textures -> DigitsTextures -> CInt -> Game -> IO ()
+renderDisplay r t dt winHeight g = do
+  -- print g
   -- moving sky
   renderRepeatedTexture r (skyT t) posSky (winHeight-112)
   -- Rendering pipes
@@ -134,6 +165,8 @@ renderDisplay r t winHeight g = do
   renderRepeatedTexture r (landT t) posGround winHeight
   -- The animated bird
   renderBird r t (bird g)
+  -- the score
+  renderScore r dt (score g)
   where
     posGround = round $ groundPos $ ground g
     posSky = round $ skyPos $ sky g
@@ -144,6 +177,9 @@ renderSounds as g = do
     playFile (wingA as) 1
   when (checkCollision g) $
     playFile (dieA as) 3
+  let pipeCoord = pipePos (pipes g)
+  when (pipeCoord >= 75.0 && pipeCoord <= 76.0) $
+    playFile (pointA as) 2
 
 animate :: Text                  -- ^ window title
         -> Int                   -- ^ window width in pixels
@@ -160,6 +196,7 @@ animate title winWidth winHeight sf = do
     renderer <- SDL.createRenderer window (-1) renderConf
     SDL.rendererDrawColor renderer $= backgroundColor
     textures <- loadTextures renderer
+    digitsTextures <- loadDigitsTextures renderer
 
     lastInteraction <- newMVar =<< SDL.time
 
@@ -172,7 +209,7 @@ animate title winWidth winHeight sf = do
         renderOutput changed (gameState, shouldExit) = do
           when changed $ do
               SDL.clear renderer
-              renderDisplay renderer textures (fromIntegral winHeight) gameState
+              renderDisplay renderer textures digitsTextures (fromIntegral winHeight) gameState
               renderSounds audios gameState
               SDL.present renderer
           return shouldExit
@@ -180,6 +217,7 @@ animate title winWidth winHeight sf = do
     reactimate (return NoEvent) senseInput renderOutput sf
 
     destroyTextures textures
+    destroyDigitsTextures digitsTextures
     destroyAudios audios
     SDL.destroyRenderer renderer
     SDL.destroyWindow window

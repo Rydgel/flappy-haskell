@@ -26,8 +26,8 @@ data Audio = Audio { audioName :: String, unAudio :: SDL.Mixer.Chunk }
 initAudio :: IO ()
 initAudio = void $ do
   SDL.Mixer.initialize [SDL.Mixer.InitOGG]
-  _result <- RawMix.openAudio 44100 RawMix.AUDIO_S16SYS 2 4096
-  SDL.Mixer.reserveChannels 16
+  RawMix.openAudio 44100 RawMix.AUDIO_S16SYS 2 4096
+  -- SDL.Mixer.reserveChannels 16
 
 -- | Load a music file, returning a 'Music' if loaded successfully.
 loadMusic :: String -> IO Music
@@ -65,5 +65,5 @@ loadAudio fp = do
 -- with the threaded RTS.
 playFile :: Audio -> Int -> IO ()
 playFile wav t = void $ forkOS $ do
-  _v <- SDL.Mixer.playOn 0 SDL.Mixer.Once (unAudio wav)
+  _v <- SDL.Mixer.playOn (-1) SDL.Mixer.Once (unAudio wav)
   threadDelay (t * 1000)

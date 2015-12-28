@@ -27,7 +27,7 @@ loadTexture r filePath = do
   SDL.surfaceColorKey surface $= Just key
   t <- SDL.createTextureFromSurface r surface
   SDL.freeSurface surface
-  return (Texture t size)
+  return $ Texture t size
 
 renderTexture :: SDL.Renderer -> Texture -> Point V2 CInt -> IO ()
 renderTexture r (Texture t size) xy =
