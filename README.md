@@ -6,6 +6,11 @@ Flappy Bird implementation made with SDL2 and FRP (Yampa).
 
 ## Installation
 
+You will need some system libraries:
+ - SDL2
+ - SDL2_Image
+ - SDL2_Mixer
+
 Don't forget to get the submodules then:
 
 ```
