@@ -150,19 +150,18 @@ renderScore :: SDL.Renderer -> DigitsTextures -> Int -> IO ()
 renderScore r dt scoreInt = do
   let stringScore = show scoreInt
       totalWidth  = 28.0 * genericLength stringScore
-      screenW     = 276.0 :: Double
-      start       = round $ (screenW - totalWidth) / 2
+      start       = round $ (winWidth - totalWidth) / 2
   foldM_ (\z c -> renderDigit r dt c (P (V2 z 25)) >> return (z+28)) start stringScore
 
 renderDisplay :: SDL.Renderer -> Textures -> DigitsTextures -> CInt -> Game -> IO ()
-renderDisplay r t dt winHeight g = do
+renderDisplay r t dt wh g = do
   -- print g
   -- moving sky
-  renderRepeatedTexture r (skyT t) posSky (winHeight-112)
+  renderRepeatedTexture r (skyT t) posSky (wh - round groundHeight)
   -- Rendering pipes
-  renderPipes r t winHeight (pipes g)
+  renderPipes r t wh (pipes g)
   -- Moving ground
-  renderRepeatedTexture r (landT t) posGround winHeight
+  renderRepeatedTexture r (landT t) posGround wh
   -- The animated bird
   renderBird r t (bird g)
   -- the score
@@ -186,7 +185,7 @@ animate :: Text                  -- ^ window title
         -> Int                   -- ^ window height in pixels
         -> SF WinInput WinOutput -- ^ signal function to animate
         -> IO ()
-animate title winWidth winHeight sf = do
+animate title ww wh sf = do
     SDL.initialize [SDL.InitVideo, SDL.InitAudio]
     SDL.HintRenderScaleQuality $= SDL.ScaleBest
     initAudio
@@ -209,7 +208,7 @@ animate title winWidth winHeight sf = do
         renderOutput changed (gameState, shouldExit) = do
           when changed $ do
               SDL.clear renderer
-              renderDisplay renderer textures digitsTextures (fromIntegral winHeight) gameState
+              renderDisplay renderer textures digitsTextures (fromIntegral wh) gameState
               renderSounds audios gameState
               SDL.present renderer
           return shouldExit
@@ -226,7 +225,7 @@ animate title winWidth winHeight sf = do
     where
       windowConf = SDL.defaultWindow
          { SDL.windowInitialSize =
-             V2 (fromIntegral winWidth) (fromIntegral winHeight)
+             V2 (fromIntegral ww) (fromIntegral wh)
          , SDL.windowOpenGL = Just SDL.defaultOpenGL
          }
       renderConf = SDL.RendererConfig

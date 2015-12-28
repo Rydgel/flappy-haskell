@@ -11,8 +11,30 @@ import           Prelude             hiding (init)
 import           Input
 import           Types
 
+
 birdX :: Double
 birdX = 75.0
+
+winHeight :: Double
+winHeight = 600.0
+
+winWidth :: Double
+winWidth = 276.0
+
+groundHeight :: Double
+groundHeight = 112.0
+
+pipeGap :: Double
+pipeGap = 100.0
+
+pipeWidth :: Double
+pipeWidth = 52.0
+
+birdWidth :: Double
+birdWidth = 34.0
+
+birdHeight :: Double
+birdHeight = 24.0
 
 fallingBird :: Bird -> SF a Bird
 fallingBird (Bird y0 v0 s0) = proc _ -> do
@@ -52,7 +74,7 @@ movingPipes rng (Pipes pu pd p0) = switch sf (\_ ->
 genRandPipes :: RandomGen g => g -> (Pipes,g)
 genRandPipes rng =
   let (pipeTop, rng') = randomR (50.0,320.0) rng
-  in  (Pipes pipeTop (600-(pipeTop+100)) 300.0, rng')
+  in  (Pipes pipeTop (winHeight-(pipeTop+pipeGap)) 300.0, rng')
 
 gameSession :: RandomGen g => g -> SF AppInput Game
 gameSession rng = proc input -> do
@@ -83,13 +105,13 @@ flapTrigger = proc input -> do
 checkCollision :: Game -> Bool
 checkCollision Game{..} =
   or [ collide (pipeHeight, pipeHeight)
-     , collide (600, 600 - pipeHeight - 100)
-     , birdY >= 600 - 112 - 24
-     , birdY <= 0]
-  where collide (y2, h2) = and [ birdX + 34  > pipeX
-                               , birdX       < pipeX + 52
-                               , birdY       > y2 - h2
-                               , birdY - 24  < y2 ]
+     , collide (winHeight, winHeight - pipeHeight - pipeGap + birdHeight)
+     , birdY >= winHeight - groundHeight - birdHeight
+     , birdY <= 0] -- upper sky limit
+  where collide (y2, h2) = and [ birdX + birdWidth  > pipeX
+                               , birdX              < pipeX + pipeWidth
+                               , birdY              > y2 - h2
+                               , birdY - birdHeight < y2 ]
         birdY = birdPos bird
         pipeX = pipePos pipes
         pipeHeight = pipeUp pipes

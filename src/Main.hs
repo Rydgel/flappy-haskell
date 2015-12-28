@@ -12,4 +12,5 @@ import           System.Random (newStdGen)
 main :: IO ()
 main = do
   g <- newStdGen
-  animate "Flappy Haskell" 276 600 (parseWinInput >>> (game g &&& handleExit))
+  animate "Flappy Haskell" (round winWidth) (round winHeight) $
+    parseWinInput >>> (game g &&& handleExit)
