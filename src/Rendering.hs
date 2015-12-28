@@ -121,7 +121,7 @@ birdAngleFromVelocity v = realToFrac $ checkMaxRot$ v / 3
 renderBird :: SDL.Renderer -> Textures -> Bird -> IO ()
 renderBird r t b = renderTextureRotated r birdSprite cxy angleBird
   where
-    cxy        = P (V2 75 posBird)
+    cxy        = P (V2 (round birdX) posBird)
     posBird    = round $ birdPos b
     stateBird  = round $ birdState b :: Int
     angleBird  = birdAngleFromVelocity $ birdVel b
@@ -178,7 +178,7 @@ renderSounds as g = do
   when (checkCollision g) $
     playFile (dieA as) 3
   let pipeCoord = pipePos (pipes g)
-  when (pipeCoord >= 75.0 && pipeCoord <= 76.0) $
+  when (pipeCoord >= birdX && pipeCoord <= (birdX+1)) $
     playFile (pointA as) 2
 
 animate :: Text                  -- ^ window title

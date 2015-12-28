@@ -6,11 +6,13 @@
 module Game where
 
 import           FRP.Yampa
-import           Prelude   hiding (init)
+import           Prelude             hiding (init)
 
 import           Input
 import           Types
 
+birdX :: Double
+birdX = 75.0
 
 fallingBird :: Bird -> SF a Bird
 fallingBird (Bird y0 v0 s0) = proc _ -> do
@@ -79,4 +81,15 @@ flapTrigger = proc input -> do
   returnA -< mouseTap `lMerge` spacebarTap
 
 checkCollision :: Game -> Bool
-checkCollision Game{..} = score == 15
+checkCollision Game{..} =
+  or [ collide (pipeHeight, pipeHeight)
+     , collide (600, 600 - pipeHeight - 100)
+     , birdY >= 600 - 112 - 24
+     , birdY <= 0]
+  where collide (y2, h2) = and [ birdX + 34  > pipeX
+                               , birdX       < pipeX + 52
+                               , birdY       > y2 - h2
+                               , birdY - 24  < y2 ]
+        birdY = birdPos bird
+        pipeX = pipePos pipes
+        pipeHeight = pipeUp pipes
