@@ -16,7 +16,7 @@ import qualified SDL.Image
 
 
 data Texture = Texture { getSDLTexture :: SDL.Texture
-                       , coord         :: V2 CInt
+                       , sizeT         :: V2 CInt
                        }
 
 loadTexture :: SDL.Renderer -> FilePath -> IO Texture
