@@ -11,24 +11,17 @@ You will need some system libraries:
  - SDL2_Image
  - SDL2_Mixer (with libvorbis/Ogg support enabled!)
 
-Don't forget to get the submodules:
-
-```bash
-$ git clone --recursive https://github.com/Rydgel/flappy-haskell
-```
-
-```bash
-$ stack build
-$ stack exec flappy-haskell
-```
-
 ### Installation on OS X
 
 ```bash
 $ brew install sdl2
 $ brew install sdl2_image
 $ brew install sdl2_mixer --with-libvorbis
+```
 
+```bash
+$ git clone https://github.com/Rydgel/flappy-haskell
+$ cd flappy-haskell
 $ stack build
 $ stack exec flappy-haskell
 ```

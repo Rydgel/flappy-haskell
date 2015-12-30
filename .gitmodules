@@ -1,6 +1,0 @@
-[submodule "sdl2-image"]
-	path = sdl2-image
-	url = https://github.com/sbidin/sdl2-image
-[submodule "sdl2-mixer"]
-	path = sdl2-mixer
-	url = https://github.com/sbidin/sdl2-mixer
