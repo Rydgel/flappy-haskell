@@ -16,4 +16,4 @@ resolver: lts-3.13
 
 rebuild-ghc-options: true
 ghc-options:
-    flappy-haskell: "-threaded -O2 -rtsopts -with-rtsopts=-N -Wall -lsdl2_image -lsdl2_mixer"
+    flappy-haskell: "-threaded -O2 -rtsopts -with-rtsopts=-N -Wall -lSDL2_image -lSDL2_mixer"
