@@ -1,11 +1,19 @@
 packages:
 - '.'
-- sdl2-image
-- sdl2-mixer
+- location:
+    git: https://github.com/sbidin/sdl2-mixer
+    commit: bbb6eb10896d228c384decee7e6b61558c78e3ad
+  extra-dep: true
+- location:
+    git: https://github.com/sbidin/sdl2-image
+    commit: 5ea4a9f8d1ccb7227d54669a143e5ae3c554040a
+  extra-dep: true
+
 extra-deps:
 - sdl2-2.1.0
-- Yampa-0.10.3
+
 resolver: lts-3.13
+
 rebuild-ghc-options: true
 ghc-options:
     flappy-haskell: "-threaded -O2 -rtsopts -with-rtsopts=-N -Wall -lsdl2_image -lsdl2_mixer"
