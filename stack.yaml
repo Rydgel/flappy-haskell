@@ -9,10 +9,7 @@ packages:
     commit: 5ea4a9f8d1ccb7227d54669a143e5ae3c554040a
   extra-dep: true
 
-extra-deps:
-- sdl2-2.1.0
-
-resolver: lts-3.13
+resolver: lts-7.3
 
 rebuild-ghc-options: true
 ghc-options:
