@@ -1,8 +1,8 @@
 packages:
 - '.'
 - location:
-    git: https://github.com/sbidin/sdl2-mixer
-    commit: bbb6eb10896d228c384decee7e6b61558c78e3ad
+    git: https://github.com/fgaz/sdl2-mixer
+    commit: 577cc0091fb6d830a81171fe80ebe663a3864eda
   extra-dep: true
 - location:
     git: https://github.com/sbidin/sdl2-image
