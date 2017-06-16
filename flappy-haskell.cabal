@@ -26,10 +26,10 @@ executable flappy-haskell
                        Graphics
   -- other-extensions:
   build-depends:       base >= 4.8 && <4.10,
-                       sdl2 >= 2.1.0,
-                       sdl2-image == 0.2,
-                       sdl2-mixer == 0.1,
-                       Yampa >= 0.10.3,
+                       sdl2,
+                       sdl2-image,
+                       sdl2-mixer,
+                       Yampa,
                        linear,
                        text,
                        StateVar,

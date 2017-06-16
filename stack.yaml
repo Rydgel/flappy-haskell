@@ -1,15 +1,7 @@
 packages:
 - '.'
-- location:
-    git: https://github.com/fgaz/sdl2-mixer
-    commit: 577cc0091fb6d830a81171fe80ebe663a3864eda
-  extra-dep: true
-- location:
-    git: https://github.com/sbidin/sdl2-image
-    commit: 5ea4a9f8d1ccb7227d54669a143e5ae3c554040a
-  extra-dep: true
 
-resolver: lts-7.3
+resolver: lts-8.18
 
 rebuild-ghc-options: true
 ghc-options:
