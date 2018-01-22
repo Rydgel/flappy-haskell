@@ -25,7 +25,7 @@ executable flappy-haskell
                        Input,
                        Graphics
   -- other-extensions:
-  build-depends:       base >= 4.8 && <4.10,
+  build-depends:       base >= 4.8 && <4.11,
                        sdl2,
                        sdl2-image,
                        sdl2-mixer,
