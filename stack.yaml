@@ -1,8 +1,10 @@
 packages:
 - '.'
 
-resolver: lts-10.3
+resolver: lts-10.5
 
 rebuild-ghc-options: true
+extra-deps:
+  - sdl2-mixer-1.1.0
 ghc-options:
     flappy-haskell: "-threaded -O2 -rtsopts -with-rtsopts=-N -Wall -lSDL2_image -lSDL2_mixer"
